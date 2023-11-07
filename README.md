@@ -56,4 +56,14 @@ This repo is built on the pioneer works. We appreciate the following GitHub repo
 
 ### Citation
 
-TBD
+If you find this repository useful for your work, please consider citing it as follows:
+
+```bibtex
+@inproceedings{liu2023adaptive,
+  title={Adaptive Normalization for Non-stationary Time Series Forecasting: A Temporal Slice Perspective},
+  author={Liu, Zhiding and Cheng, Mingyue and Li, Zhi and Huang, Zhenya and Liu, Qi and Xie, Yanhu and Chen, Enhong},
+  booktitle={Thirty-seventh Conference on Neural Information Processing Systems},
+  year={2023}
+}
+```
+
