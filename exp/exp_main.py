@@ -78,6 +78,8 @@ class Exp_Main(Exp_Basic):
                 if epoch + 1 <= self.station_pretrain_epoch:
                     f_dim = -1 if self.args.features == 'MS' else 0
                     batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
+                    if self.args.features == 'MS':
+                        statistics_pred = statistics_pred[:, :, [self.args.enc_in - 1, -1]]
                     loss = self.station_loss(batch_y, statistics_pred)
                 else:
                     # decoder input
@@ -103,6 +105,8 @@ class Exp_Main(Exp_Basic):
                             else:
                                 outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
                     f_dim = -1 if self.args.features == 'MS' else 0
+                    if self.args.features == 'MS':
+                        statistics_pred = statistics_pred[:, :, [self.args.enc_in - 1, -1]]
                     outputs = outputs[:, -self.args.pred_len:, f_dim:]
                     outputs = self.statistics_pred.de_normalize(outputs, statistics_pred)
                     batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
@@ -165,6 +169,8 @@ class Exp_Main(Exp_Basic):
                 if epoch + 1 <= self.station_pretrain_epoch:
                     f_dim = -1 if self.args.features == 'MS' else 0
                     batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
+                    if self.args.features == 'MS':
+                        statistics_pred = statistics_pred[:, :, [self.args.enc_in - 1, -1]]
                     loss = self.station_loss(batch_y, statistics_pred)
                     train_loss.append(loss.item())
                 else:
@@ -202,6 +208,8 @@ class Exp_Main(Exp_Basic):
                                 outputs = self.model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
                         f_dim = -1 if self.args.features == 'MS' else 0
                         outputs = outputs[:, -self.args.pred_len:, f_dim:]
+                        if self.args.features == 'MS':
+                            statistics_pred = statistics_pred[:, :, [self.args.enc_in - 1, -1]]
                         outputs = self.statistics_pred.de_normalize(outputs, statistics_pred)
                         batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
                         loss = self.criterion(outputs, batch_y)
@@ -210,7 +218,8 @@ class Exp_Main(Exp_Basic):
                 if (i + 1) % 100 == 0:
                     print("\titers: {0}, epoch: {1} | loss: {2:.7f}".format(i + 1, epoch + 1, loss.item()))
                     speed = (time.time() - time_now) / iter_count
-                    left_time = speed * ((self.args.train_epochs + self.station_pretrain_epoch - epoch) * train_steps - i)
+                    left_time = speed * (
+                            (self.args.train_epochs + self.station_pretrain_epoch - epoch) * train_steps - i)
                     print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))
                     iter_count = 0
                     time_now = time.time()
@@ -315,7 +324,8 @@ class Exp_Main(Exp_Basic):
                 f_dim = -1 if self.args.features == 'MS' else 0
                 # print(outputs.shape,batch_y.shape)
                 outputs = outputs[:, -self.args.pred_len:, f_dim:]
-                ## modify here
+                if self.args.features == 'MS':
+                    statistics_pred = statistics_pred[:, :, [self.args.enc_in - 1, -1]]
                 outputs = self.statistics_pred.de_normalize(outputs, statistics_pred)
                 batch_y = batch_y[:, -self.args.pred_len:, f_dim:].to(self.device)
                 outputs = outputs.detach().cpu().numpy()

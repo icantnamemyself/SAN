@@ -39,7 +39,7 @@ parser.add_argument('--station_lr', type=float, default=0.0001)
 parser.add_argument('--data', type=str, default='ETTh2', help='dataset type')
 parser.add_argument('--root_path', type=str, default='./datasets/ETT-small', help='root path of the data file')
 parser.add_argument('--data_path', type=str, default='ETTh2.csv', help='data file')
-parser.add_argument('--features', type=str, default='M',
+parser.add_argument('--features', type=str, default='MS',
                     help='forecasting task, options:[M, S, MS]; M:multivariate predict multivariate, S:univariate predict univariate, MS:multivariate predict univariate')
 parser.add_argument('--target', type=str, default='OT', help='target feature in S or MS task')
 parser.add_argument('--freq', type=str, default='h',
