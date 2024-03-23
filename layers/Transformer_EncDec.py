@@ -36,10 +36,10 @@ class EncoderLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.activation = F.relu if activation == "relu" else F.gelu
 
-    def forward(self, x, attn_mask=None, non_station_factor=None):
+    def forward(self, x, attn_mask=None):
         new_x, attn = self.attention(
             x, x, x,
-            attn_mask=attn_mask, non_station_factor=non_station_factor
+            attn_mask=attn_mask
         )
         x = x + self.dropout(new_x)
 
@@ -57,19 +57,19 @@ class Encoder(nn.Module):
         self.conv_layers = nn.ModuleList(conv_layers) if conv_layers is not None else None
         self.norm = norm_layer
 
-    def forward(self, x, attn_mask=None, non_station_factor=None):
+    def forward(self, x, attn_mask=None):
         # x [B, L, D]
         attns = []
         if self.conv_layers is not None:
             for attn_layer, conv_layer in zip(self.attn_layers, self.conv_layers):
-                x, attn = attn_layer(x, attn_mask=attn_mask, non_station_factor=non_station_factor)
+                x, attn = attn_layer(x, attn_mask=attn_mask)
                 x = conv_layer(x)
                 attns.append(attn)
             x, attn = self.attn_layers[-1](x)
             attns.append(attn)
         else:
             for attn_layer in self.attn_layers:
-                x, attn = attn_layer(x, attn_mask=attn_mask, non_station_factor=non_station_factor)
+                x, attn = attn_layer(x, attn_mask=attn_mask)
                 attns.append(attn)
 
         if self.norm is not None:
@@ -93,21 +93,16 @@ class DecoderLayer(nn.Module):
         self.dropout = nn.Dropout(dropout)
         self.activation = F.relu if activation == "relu" else F.gelu
 
-    def forward(self, x, cross, x_mask=None, cross_mask=None, non_station_factor=None):
-        if not non_station_factor:
-            non_station_factor_self_attn = None
-        else:
-            non_station_factor_self_attn = [non_station_factor[0],
-                                            torch.zeros(non_station_factor[1].shape[0], 1).to(x.device)]
+    def forward(self, x, cross, x_mask=None, cross_mask=None):
         x = x + self.dropout(self.self_attention(
             x, x, x,
-            attn_mask=x_mask, non_station_factor=non_station_factor_self_attn
+            attn_mask=x_mask
         )[0])
         x = self.norm1(x)
 
         x = x + self.dropout(self.cross_attention(
             x, cross, cross,
-            attn_mask=cross_mask, non_station_factor=non_station_factor
+            attn_mask=cross_mask
         )[0])
 
         y = x = self.norm2(x)
@@ -124,9 +119,9 @@ class Decoder(nn.Module):
         self.norm = norm_layer
         self.projection = projection
 
-    def forward(self, x, cross, x_mask=None, cross_mask=None, non_station_factor=None):
+    def forward(self, x, cross, x_mask=None, cross_mask=None):
         for layer in self.layers:
-            x = layer(x, cross, x_mask=x_mask, cross_mask=cross_mask, non_station_factor=non_station_factor)
+            x = layer(x, cross, x_mask=x_mask, cross_mask=cross_mask)
 
         if self.norm is not None:
             x = self.norm(x)

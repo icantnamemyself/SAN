@@ -19,7 +19,7 @@ class FullAttention(nn.Module):
         self.output_attention = output_attention
         self.dropout = nn.Dropout(attention_dropout)
 
-    def forward(self, queries, keys, values, attn_mask, non_station_factor=None):
+    def forward(self, queries, keys, values, attn_mask):
         B, L, H, E = queries.shape
         _, S, _, D = values.shape
         scale = self.scale or 1. / sqrt(E)
@@ -103,7 +103,7 @@ class ProbAttention(nn.Module):
         else:
             return (context_in, None)
 
-    def forward(self, queries, keys, values, attn_mask, non_station_factor=None):
+    def forward(self, queries, keys, values, attn_mask):
         B, L_Q, H, D = queries.shape
         _, L_K, _, _ = keys.shape
 
